@@ -7,6 +7,7 @@ COPY *.sln .
 COPY src/ResumeJobMatcher.Api/*.csproj src/ResumeJobMatcher.Api/
 COPY src/ResumeJobMatcher.Core/*.csproj src/ResumeJobMatcher.Core/
 COPY src/ResumeJobMatcher.Infrastructure/*.csproj src/ResumeJobMatcher.Infrastructure/
+COPY src/ResumeJobMatcher.Tests/*.csproj src/ResumeJobMatcher.Tests/
 COPY *.props ./
 
 # Restore dependencies

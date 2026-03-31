@@ -8,12 +8,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MatchingSettings__LlmEndpoint=http://llama-server:11434
-      - MatchingSettings__ModelName=deepseek-r1:14b
+      - MatchingSettings__ModelName=llama3.2:1b
     depends_on:
       - llama-server
 
   llama-server:
-    image: ollama/ollama:rocm
+    image: ollama/ollama:0.17.5-rocm
     container_name: ollama-resume-matcher
     restart: always
     devices:

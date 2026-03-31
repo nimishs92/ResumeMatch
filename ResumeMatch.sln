@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResumeJobMatcher.Core", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResumeJobMatcher.Infrastructure", "src\ResumeJobMatcher.Infrastructure\ResumeJobMatcher.Infrastructure.csproj", "{FB087464-2B07-1A60-B8F1-D84C9A84CF3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResumeJobMatcher.Tests", "src\ResumeJobMatcher.Tests\ResumeJobMatcher.Tests.csproj", "{5311053D-9C54-4891-9237-781213697777}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{FB087464-2B07-1A60-B8F1-D84C9A84CF3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB087464-2B07-1A60-B8F1-D84C9A84CF3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB087464-2B07-1A60-B8F1-D84C9A84CF3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5311053D-9C54-4891-9237-781213697777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5311053D-9C54-4891-9237-781213697777}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5311053D-9C54-4891-9237-781213697777}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5311053D-9C54-4891-9237-781213697777}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,6 +42,7 @@ Global
 		{0B0809F1-BF8E-3E46-946E-94F251E5D411} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{6455E03B-6219-0948-AA99-44267898E70D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{FB087464-2B07-1A60-B8F1-D84C9A84CF3C} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{5311053D-9C54-4891-9237-781213697777} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {84DE8088-4A31-484E-B1F5-A72D836AA5E0}

@@ -35,6 +35,7 @@ builder.Services.AddScoped<ILlmService, LlmService>();
 
 // Register application services
 builder.Services.AddScoped<IResumeService, ResumeService>();
+builder.Services.AddScoped<IResumeProcessingService, ResumeProcessingService>();
 builder.Services.AddScoped<IJobDescriptionService, JobDescriptionService>();
 builder.Services.AddScoped<IMatcherService, MatcherService>();
 

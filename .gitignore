@@ -2,3 +2,6 @@
 # AI Development Tools Configuration Files
 .continue/
 .opencode/
+
+# Installation scripts
+install.sh

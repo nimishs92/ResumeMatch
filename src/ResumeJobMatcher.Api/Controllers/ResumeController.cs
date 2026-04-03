@@ -20,7 +20,7 @@ namespace ResumeJobMatcher.Api.Controllers
         }
 
         [HttpPost("process")]
-        public async Task<IActionResult> ProcessResume([FromForm] IFormFile file)
+        public async Task<IActionResult> ProcessResume(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded");

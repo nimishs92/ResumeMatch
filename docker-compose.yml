@@ -9,6 +9,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - MatchingSettings__LlmEndpoint=http://llama-server:11434
       - MatchingSettings__ModelName=llama3.2:1b
+    volumes:
+      - resume_app_data:/app/resumes
     depends_on:
       - llama-server
 
@@ -29,4 +31,6 @@ services:
 
 volumes:
   ollama_data:
+    external: true
+  resume_app_data:
     external: true

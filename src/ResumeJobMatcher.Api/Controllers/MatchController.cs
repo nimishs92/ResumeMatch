@@ -23,7 +23,7 @@ namespace ResumeJobMatcher.Api.Controllers
         }
 
         [HttpPost("resumes")]
-        public async Task<IActionResult> UploadResume([FromForm] IFormFile file)
+        public async Task<IActionResult> UploadResume(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded");
@@ -42,7 +42,7 @@ namespace ResumeJobMatcher.Api.Controllers
         }
 
         [HttpPost("jobs")]
-        public async Task<IActionResult> UploadJobDescription([FromForm] IFormFile file)
+        public async Task<IActionResult> UploadJobDescription(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded");

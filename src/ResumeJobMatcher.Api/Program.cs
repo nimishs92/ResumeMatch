@@ -6,13 +6,25 @@ using ResumeJobMatcher.Infrastructure.Services;
 using ResumeJobMatcher.Core.Models;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.Ollama;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo 
+    { 
+        Title = "Resume Job Matcher API", 
+        Version = "v1" 
+    });
+    // Register the schema filter for IFormFile handling
+    // c.SchemaFilter<FormDataSchemaFilter>();
+});
 
 #pragma warning disable SKEXP0070
 // Register Semantic Kernel with Llama
@@ -47,8 +59,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.MapOpenApi();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"));
 }
 
 // app.UseHttpsRedirection();

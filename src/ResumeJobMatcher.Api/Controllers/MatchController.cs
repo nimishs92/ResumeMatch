@@ -8,55 +8,18 @@ namespace ResumeJobMatcher.Api.Controllers
     [Route("api/[controller]")]
     public class MatchController : ControllerBase
     {
-        private readonly IResumeService _resumeService;
-        private readonly IJobDescriptionService _jobDescriptionService;
+        private readonly IResumeProcessingService _resumeProcessingService;
+        private readonly IJobDescriptionProcessingService _jobDescriptionProcessingService;
         private readonly IMatcherService _matcherService;
 
         public MatchController(
-            IResumeService resumeService,
-            IJobDescriptionService jobDescriptionService,
+            IResumeProcessingService resumeProcessingService,
+            IJobDescriptionProcessingService jobDescriptionProcessingService,
             IMatcherService matcherService)
         {
-            _resumeService = resumeService;
-            _jobDescriptionService = jobDescriptionService;
+            _resumeProcessingService = resumeProcessingService;
+            _jobDescriptionProcessingService = jobDescriptionProcessingService;
             _matcherService = matcherService;
-        }
-
-        [HttpPost("resumes")]
-        public async Task<IActionResult> UploadResume(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded");
-
-            try
-            {
-                // Removed call to _resumeService.ProcessResumeAsync(file) as it's not implemented
-                // Instead, we'll just process the resume directly
-                var resume = await _resumeService.ExtractTextFromResumeAsync(file.FileName);
-                return Ok(new { message = "Resume processed successfully", content = resume });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error processing resume: {ex.Message}");
-            }
-        }
-
-        [HttpPost("jobs")]
-        public async Task<IActionResult> UploadJobDescription(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded");
-
-            try
-            {
-                // Removed call to _jobDescriptionService.ProcessJobDescriptionAsync(file) as it's not implemented
-                var jobDescription = await Task.FromResult("extracted job description");
-                return Ok(new { message = "Job description processed successfully", content = jobDescription });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error processing job description: {ex.Message}");
-            }
         }
 
         [HttpPost("match")]

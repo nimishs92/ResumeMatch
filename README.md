@@ -38,9 +38,6 @@ docker-compose up --build
 
 - `POST /api/match` - Match a resume to a job description
 - `POST /api/batch-match` - Batch match multiple resumes
-- `POST /api/resume/process` - Process a resume file and extract information
-- `GET /api/resumes` - Get all resumes
-- `GET /api/jobs` - Get all job descriptions
 
 ## Configuration
 

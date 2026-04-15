@@ -189,4 +189,23 @@ Provide a concise summary of the match.";
             return string.Empty;
         }
     }
+
+    public async Task<string> GenerateResponseAsync(string prompt)
+    {
+        try
+        {
+            var function = _kernel.CreateFunctionFromPrompt(prompt, new PromptExecutionSettings
+            {
+                ModelId = _settings.ModelName
+            });
+
+            var result = await _kernel.InvokeAsync(function);
+            return result.ToString();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating LLM response");
+            return string.Empty;
+        }
+    }
 }

@@ -3,7 +3,10 @@ using ResumeJobMatcher.Core.Services;
 using ResumeJobMatcher.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Text.Json;
 using Xunit;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ResumeJobMatcher.Tests.Services
 {
@@ -81,8 +84,9 @@ namespace ResumeJobMatcher.Tests.Services
 
             var result = await (Task<JobDescription>)methodInfo.Invoke(_service, new object[] { content, "test.txt" });
             
-            // Assert (this test would require more complex setup to test private method)
+            // Assert
             Assert.NotNull(result);
+            Assert.NotEmpty(result.Id);
         }
     }
 }

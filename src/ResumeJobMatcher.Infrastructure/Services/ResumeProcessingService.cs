@@ -9,18 +9,15 @@ namespace ResumeJobMatcher.Infrastructure.Services;
 public class ResumeProcessingService : IResumeProcessingService
 {
     private readonly ILogger<ResumeProcessingService> _logger;
-    private readonly IResumeService _resumeService;
     private readonly ILlmService _llmService;
     private readonly string _outputDirectory;
 
     public ResumeProcessingService(
         ILogger<ResumeProcessingService> logger,
-        IResumeService resumeService,
         ILlmService llmService,
         string outputDirectory = "resumes")
     {
         _logger = logger;
-        _resumeService = resumeService;
         _llmService = llmService;
         _outputDirectory = outputDirectory;
         
@@ -38,7 +35,7 @@ public class ResumeProcessingService : IResumeProcessingService
         try
         {
             // Extract text from the resume file
-            var resumeText = await _resumeService.ExtractTextFromResumeAsync(filePath);
+            var resumeText = await ExtractTextFromResumeAsync(filePath);
             _logger.LogInformation("Extracted text from resume: {FileName}", fileName);
             
             // Create a new Resume object
@@ -65,6 +62,33 @@ public class ResumeProcessingService : IResumeProcessingService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing resume: {FileName}", fileName);
+            throw;
+        }
+    }
+    
+    public async Task<string> ExtractTextFromResumeAsync(string filePath)
+    {
+        _logger.LogInformation("Extracting text from resume file: {FilePath}", filePath);
+        
+        try
+        {
+            var fileName = Path.GetFileName(filePath);
+            var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
+            
+            var text = fileExtension switch
+            {
+                ".txt" => await ExtractTextFromTxtFile(filePath),
+                ".pdf" => await ExtractTextFromPdfFile(filePath),
+                ".docx" => await ExtractTextFromDocxFile(filePath),
+                _ => throw new NotSupportedException($"File type not supported: {fileExtension}")
+            };
+            
+            _logger.LogInformation("Successfully extracted text from resume file: {FilePath}", filePath);
+            return text;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error extracting text from resume file: {FilePath}", filePath);
             throw;
         }
     }
@@ -343,6 +367,27 @@ Respond only with valid JSON. Do not include any additional text or formatting."
             _logger.LogError(ex, "Error storing resume as JSON");
             throw;
         }
+    }
+    
+    private async Task<string> ExtractTextFromTxtFile(string filePath)
+    {
+        return await File.ReadAllTextAsync(filePath);
+    }
+
+    private async Task<string> ExtractTextFromPdfFile(string filePath)
+    {
+        // For PDF processing, we would need a PDF library like iTextSharp or PdfPig
+        // This is a placeholder implementation - in a real implementation, you'd use a PDF extraction library
+        // For now, just return the file contents as text
+        return await File.ReadAllTextAsync(filePath);
+    }
+
+    private async Task<string> ExtractTextFromDocxFile(string filePath)
+    {
+        // For DOCX processing, we would need a library like DocX or ClosedXML
+        // This is a placeholder implementation - in a real implementation, you'd use a DOCX extraction library
+        // For now, just return the file contents as text
+        return await File.ReadAllTextAsync(filePath);
     }
 }
 

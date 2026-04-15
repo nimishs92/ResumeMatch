@@ -6,5 +6,4 @@ public interface IResumeService
 {
     Task<Resume> GetResumeAsync(string id);
     Task<IEnumerable<Resume>> GetAllResumesAsync();
-    Task<string> ExtractTextFromResumeAsync(string filePath);
 }

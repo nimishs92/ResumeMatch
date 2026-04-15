@@ -10,4 +10,5 @@ public interface ILlmService
     
     Task<string> ExtractKeywordsAsync(string text);
     Task<string> GenerateMatchSummaryAsync(string jobDescription, string resumeContent);
+    Task<string> GenerateResponseAsync(string prompt);
 }

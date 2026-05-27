@@ -2,7 +2,8 @@ using ResumeJobMatcher.Core.Models;
 using ResumeJobMatcher.Core.Services;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-
+using System.Text.Json.Serialization;
+using ResumeJobMatcher.Infrastructure.Serialization;
 
 namespace ResumeJobMatcher.Infrastructure.Services;
 
@@ -360,6 +361,7 @@ public class WorkExperienceExtraction
     public string Position { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DateTime? StartDate { get; set; }
+    [JsonConverter(typeof(PresentDateConverter))]
     public DateTime? EndDate { get; set; }
     public bool? IsCurrent { get; set; }
 }
@@ -370,6 +372,7 @@ public class EducationExtraction
     public string Degree { get; set; } = string.Empty;
     public string FieldOfStudy { get; set; } = string.Empty;
     public DateTime? StartDate { get; set; }
+    [JsonConverter(typeof(PresentDateConverter))]
     public DateTime? EndDate { get; set; }
     public bool? IsCurrent { get; set; }
     public string Grade { get; set; } = string.Empty;

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build: .
@@ -8,29 +6,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MatchingSettings__LlmEndpoint=http://llama-server:11434
-      - MatchingSettings__ModelName=llama3.2:1b
+      - MatchingSettings__ModelName=llama3:8b
     volumes:
       - resume_app_data:/app/resumes
-    depends_on:
-      - llama-server
-
-  llama-server:
-    image: ollama/ollama:0.17.5-rocm
-    container_name: ollama-resume-matcher
-    restart: always
-    devices:
-      - /dev/kfd:/dev/kfd
-      - /dev/dri:/dev/dri
-    ports:
-      - "11434:11434"
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-    volumes:
-      - ollama_data:/root/.ollama
-    command: serve
 
 volumes:
   ollama_data:
     external: true
   resume_app_data:
     external: true
+

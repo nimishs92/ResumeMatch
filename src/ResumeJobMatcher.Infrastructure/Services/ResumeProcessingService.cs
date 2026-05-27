@@ -2,7 +2,7 @@ using ResumeJobMatcher.Core.Models;
 using ResumeJobMatcher.Core.Services;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using System.Text.RegularExpressions;
+
 
 namespace ResumeJobMatcher.Infrastructure.Services;
 
@@ -119,78 +119,23 @@ Respond only with valid JSON containing these fields:
 - languages: array of objects with name, proficiency
 - professionalAffiliations: array of strings
 
-Example structure:
-{{
-  ""firstName"": ""John"",
-  ""lastName"": ""Doe"",
-  ""email"": ""john.doe@example.com"",
-  ""phone"": ""(123) 456-7890"",
-  ""location"": ""New York, NY"",
-  ""linkedinProfile"": ""https://linkedin.com/in/johndoe"",
-  ""portfolioUrl"": ""https://johndoe.dev"",
-  ""summary"": ""Experienced software developer with 5+ years in web applications..."",
-  ""workExperience"": [
-    {{
-      ""company"": ""Tech Corp"",
-      ""position"": ""Senior Developer"",
-      ""description"": ""Led development of enterprise applications..."",
-      ""startDate"": ""2020-01-01"",
-      ""endDate"": ""2023-12-31"",
-      ""isCurrent"": false
-    }}
-  ],
-  ""education"": [
-    {{
-      ""institution"": ""University of Technology"",
-      ""degree"": ""B.S. Computer Science"",
-      ""fieldOfStudy"": ""Computer Science"",
-      ""startDate"": ""2016-09-01"",
-      ""endDate"": ""2020-06-30"",
-      ""isCurrent"": false,
-      ""grade"": ""3.8 GPA""
-    }}
-  ],
-  ""skills"": [
-    {{
-      ""name"": ""C#"",
-      ""level"": ""Advanced"",
-      ""category"": ""Technical""
-    }}
-  ],
-  ""certifications"": [
-    {{
-      ""name"": ""AWS Certified Developer"",
-      ""issuingOrganization"": ""Amazon Web Services"",
-      ""issueDate"": ""2022-01-15"",
-      ""expirationDate"": ""2025-01-15"",
-      ""credentialUrl"": ""https://aws.amazon.com/certification""
-    }}
-  ],
-  ""languages"": [
-    {{
-      ""name"": ""English"",
-      ""proficiency"": ""Native""
-    }}
-  ],
-  ""professionalAffiliations"": [
-    ""IEEE Member"",
-    ""ACM Member""
-  ]
-}}
-
-Respond only with valid JSON. Do not include any additional text or formatting.";
+All dates must be formatted strictly as YYYY-MM-DD (e.g., 2026-02-01) to ensure JSON deserialization compatibility. Use 1st day of the month if only month and year are available (e.g., 2026-02-01 for February 2026).
+Return valid JSON only. All newline characters inside JSON string values must be explicitly escaped as \n. Do not output literal line breaks within strings.
+";
             
             // Call the LLM service to extract structured data
-            var llmResult = await _llmService.ExtractKeywordsAsync(prompt);
+            // var llmResult = await _llmService.GenerateResponseAsyncGenerics<ResumeExtractionData>(prompt);
             
-            // Clean and parse the JSON response
-            var cleanJson = CleanJsonResponse(llmResult);
+            // // Clean and parse the JSON response
+            // var cleanJson = CleanJsonResponse(llmResult);
             
-            // Parse the JSON into our data structure
-            var extractionData = JsonSerializer.Deserialize<ResumeExtractionData>(cleanJson, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            // // Parse the JSON into our data structure
+            // var extractionData = JsonSerializer.Deserialize<ResumeExtractionData>(cleanJson, new JsonSerializerOptions
+            // {
+            //     PropertyNameCaseInsensitive = true
+            // });
+
+            var extractionData = await _llmService.GenerateResponseAsyncGenerics<ResumeExtractionData>(prompt);
             
             return extractionData ?? new ResumeExtractionData();
         }

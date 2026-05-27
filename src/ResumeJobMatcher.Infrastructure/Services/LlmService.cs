@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace ResumeJobMatcher.Infrastructure.Services;
-public class LlmService : ILlmService
+public class LlmService
 {
     private readonly Kernel _kernel;
     private readonly MatchingSettings _settings;

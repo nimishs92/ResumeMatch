@@ -42,8 +42,8 @@ builder.Services.AddSingleton<Kernel>(sp =>
     return kernelBuilder.Build();
 });
 
-// Register the LLM service
-builder.Services.AddScoped<ILlmService, LlmService>();
+// Register the LLM service with LlamaSharp implementation
+builder.Services.AddScoped<ILlmService, LlamaSharpLlmService>();
 
 // Register application services
 builder.Services.AddScoped<IResumeService, ResumeService>();

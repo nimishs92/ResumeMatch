@@ -23,8 +23,16 @@ RUN dotnet publish -c Release -o out /p:UseAppHost=false
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+# Install the missing OpenMP multithreading library
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libgomp1 && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy the published output from the build stage
 COPY --from=build /app/out .
+
+# Copy models into the models directory 
+COPY models/ /app/models
 
 ENV ASPNETCORE_ENVIRONMENT=Development
 # Expose the port the app runs on

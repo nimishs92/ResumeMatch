@@ -2,7 +2,6 @@ using ResumeJobMatcher.Core.Models;
 using ResumeJobMatcher.Core.Services;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using System.Text;
 
 namespace ResumeJobMatcher.Infrastructure.Services;
 
@@ -85,76 +84,51 @@ public class JobDescriptionProcessingService : IJobDescriptionProcessingService
 
     private async Task<JobDescription> ExtractStructuredInformation(string content, string fileName)
     {
-        // Create a prompt for the LLM to extract structured information
-        var prompt = $@"
-Extract structured information from the following job description:
+        var prompt = $@"Extract structured information from the following job description:
+
 {content}
 
-Return the information in JSON format with the following structure:
-{{
-  ""title"": ""Job title"",
-  ""companyName"": ""Company name"",
-  ""companySize"": ""Company size"",
-  ""industry"": ""Industry"",
-  ""jobLevel"": ""Job level"",
-  ""jobType"": ""Job type"",
-  ""remoteOption"": ""Remote option"",
-  ""location"": ""Location"",
-  ""requiredExperience"": ""Required experience"",
-  ""requiredEducation"": ""Required education"",
-  ""requiredSkills"": [""skill1"", ""skill2""],
-  ""desiredSkills"": [""skill1"", ""skill2""],
-  ""preferredExperience"": ""Preferred experience"",
-  ""salaryRange"": ""Salary range"",
-  ""benefits"": [""benefit1"", ""benefit2""],
-  ""workHours"": ""Work hours"",
-  ""applicationInstructions"": ""Application instructions"",
-  ""applicationUrl"": ""Application URL"",
-  ""postedDate"": ""Posted date"",
-  ""expiryDate"": ""Expiry date"",
-  ""department"": ""Department""
-}}
+Respond only with valid JSON containing these fields:
+- title: string
+- companyName: string
+- companySize: string
+- industry: string
+- jobLevel: string
+- jobType: string
+- remoteOption: string
+- location: string
+- requiredExperience: string
+- requiredEducation: string
+- requiredSkills: array of strings
+- desiredSkills: array of strings
+- preferredExperience: string
+- salaryRange: string
+- benefits: array of strings
+- workHours: string
+- applicationInstructions: string
+- applicationUrl: string
+- postedDate: string (YYYY-MM-DD format, or null if not available)
+- expiryDate: string (YYYY-MM-DD format, or null if not available)
+- department: string
 
-Extract all relevant information, even if it's not explicitly mentioned. If information is missing, leave the field empty.
-";
+Return valid JSON only. All newline characters inside JSON string values must be explicitly escaped as \n.";
 
-        // Call LLM service to extract information
-        var llmResponse = await _llmService.GenerateResponseAsync(prompt);
-        
-        // Parse the response and populate the job description object
         try
         {
-            // Try to extract JSON from the LLM response
-            var jsonResponse = ExtractJsonFromResponse(llmResponse);
-            
-            // If we got valid JSON, parse it
-            if (!string.IsNullOrEmpty(jsonResponse))
+            var extractionData = await _llmService.GenerateResponseAsyncGenerics<JobDescriptionExtractionData>(prompt);
+
+            if (extractionData != null)
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-                
-                var jobDescription = JsonSerializer.Deserialize<JobDescription>(jsonResponse, options);
-                
-                if (jobDescription != null)
-                {
-                    // Set content and keywords
-                    jobDescription.Content = content;
-                    jobDescription.Keywords = ExtractKeywords(content);
-                    return jobDescription;
-                }
+                return MapToJobDescription(content, extractionData);
             }
-            
-            // Fallback to basic information extraction
-            _logger.LogWarning("Could not parse structured response from LLM. Using fallback method.");
         }
         catch (Exception ex)
         {
-            _logger.LogWarning("Error parsing structured response from LLM, using basic extraction. Error: {Error}", ex.Message);
+            _logger.LogWarning(ex, "Error extracting structured information from LLM, using fallback method.");
         }
-        
+
         // Fallback to basic information extraction
+        _logger.LogWarning("Could not parse structured response from LLM. Using fallback method.");
         return new JobDescription
         {
             Content = content,
@@ -162,62 +136,34 @@ Extract all relevant information, even if it's not explicitly mentioned. If info
         };
     }
 
-    private string ExtractJsonFromResponse(string response)
+    private JobDescription MapToJobDescription(string content, JobDescriptionExtractionData extraction)
     {
-        if (string.IsNullOrWhiteSpace(response))
-            return string.Empty;
-
-        try
+        return new JobDescription
         {
-            // Check for markdown code blocks and extract JSON
-            if (response.StartsWith("```json") && response.EndsWith("```"))
-            {
-                // Extract content between ```json and ```
-                int startIndex = response.IndexOf('\n') + 1;
-                int endIndex = response.LastIndexOf('\n');
-                if (startIndex > 0 && endIndex > startIndex)
-                {
-                    return response.Substring(startIndex, endIndex - startIndex).Trim();
-                }
-                else
-                {
-                    // Remove the markdown markers entirely
-                    return response.Substring(7, response.Length - 10).Trim();
-                }
-            }
-            else if (response.StartsWith("```") && response.EndsWith("```"))
-            {
-                // Handle generic code blocks
-                int startIndex = response.IndexOf('\n') + 1;
-                int endIndex = response.LastIndexOf('\n');
-                if (startIndex > 0 && endIndex > startIndex)
-                {
-                    return response.Substring(startIndex, endIndex - startIndex).Trim();
-                }
-                else
-                {
-                    // Remove the markdown markers entirely
-                    return response.Substring(3, response.Length - 6).Trim();
-                }
-            }
-            else
-            {
-                // Try to find JSON content in the response (might be unformatted)
-                var jsonStart = response.IndexOf('{');
-                var jsonEnd = response.LastIndexOf('}');
-                
-                if (jsonStart >= 0 && jsonEnd > jsonStart)
-                {
-                    return response.Substring(jsonStart, jsonEnd - jsonStart + 1);
-                }
-            }
-            
-            return response.Trim();
-        }
-        catch
-        {
-            return response.Trim();
-        }
+            Content = content,
+            Keywords = ExtractKeywords(content),
+            Title = extraction.Title ?? string.Empty,
+            CompanyName = extraction.CompanyName ?? string.Empty,
+            CompanySize = extraction.CompanySize ?? string.Empty,
+            Industry = extraction.Industry ?? string.Empty,
+            JobLevel = extraction.JobLevel ?? string.Empty,
+            JobType = extraction.JobType ?? string.Empty,
+            RemoteOption = extraction.RemoteOption ?? string.Empty,
+            Location = extraction.Location ?? string.Empty,
+            RequiredExperience = extraction.RequiredExperience ?? string.Empty,
+            RequiredEducation = extraction.RequiredEducation ?? string.Empty,
+            RequiredSkills = extraction.RequiredSkills ?? new List<string>(),
+            DesiredSkills = extraction.DesiredSkills ?? new List<string>(),
+            PreferredExperience = extraction.PreferredExperience ?? string.Empty,
+            SalaryRange = extraction.SalaryRange ?? string.Empty,
+            Benefits = extraction.Benefits ?? new List<string>(),
+            WorkHours = extraction.WorkHours ?? string.Empty,
+            ApplicationInstructions = extraction.ApplicationInstructions ?? string.Empty,
+            ApplicationUrl = extraction.ApplicationUrl ?? string.Empty,
+            PostedDate = extraction.PostedDate ?? DateTime.UtcNow,
+            ExpiryDate = extraction.ExpiryDate,
+            Department = extraction.Department ?? string.Empty
+        };
     }
 
     private List<string> ExtractKeywords(string content)
@@ -255,4 +201,29 @@ Extract all relevant information, even if it's not explicitly mentioned. If info
         
         _logger.LogInformation("Stored job description to: {FilePath}", filePath);
     }
+}
+
+public class JobDescriptionExtractionData
+{
+    public string Title { get; set; } = string.Empty;
+    public string CompanyName { get; set; } = string.Empty;
+    public string CompanySize { get; set; } = string.Empty;
+    public string Industry { get; set; } = string.Empty;
+    public string JobLevel { get; set; } = string.Empty;
+    public string JobType { get; set; } = string.Empty;
+    public string RemoteOption { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+    public string RequiredExperience { get; set; } = string.Empty;
+    public string RequiredEducation { get; set; } = string.Empty;
+    public List<string> RequiredSkills { get; set; } = new();
+    public List<string> DesiredSkills { get; set; } = new();
+    public string PreferredExperience { get; set; } = string.Empty;
+    public string SalaryRange { get; set; } = string.Empty;
+    public List<string> Benefits { get; set; } = new();
+    public string WorkHours { get; set; } = string.Empty;
+    public string ApplicationInstructions { get; set; } = string.Empty;
+    public string ApplicationUrl { get; set; } = string.Empty;
+    public DateTime? PostedDate { get; set; }
+    public DateTime? ExpiryDate { get; set; }
+    public string Department { get; set; } = string.Empty;
 }

@@ -7,6 +7,8 @@ using System.Text.Json;
 using Xunit;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Reflection;
 
 namespace ResumeJobMatcher.Tests.Services
 {
@@ -35,17 +37,23 @@ namespace ResumeJobMatcher.Tests.Services
             var filePath = "test.txt";
             var fileName = "test.txt";
             var content = "Test job description content";
-            
-            _llmServiceMock.Setup(x => x.GenerateResponseAsync(It.IsAny<string>()))
-                .ReturnsAsync("{\"title\": \"Test Job\", \"companyName\": \"Test Company\"}");
-            
+
+            _llmServiceMock.Setup(x => x.GenerateResponseAsyncGenerics<JobDescriptionExtractionData>(It.IsAny<string>()))
+                .ReturnsAsync(new JobDescriptionExtractionData
+                {
+                    Title = "Test Job",
+                    CompanyName = "Test Company"
+                });
+
             // Act
             var result = await _service.ProcessJobDescriptionAsync(filePath, fileName);
-            
+
             // Assert
             Assert.NotNull(result);
             Assert.NotEmpty(result.Id);
             Assert.Equal(content, result.Content);
+            Assert.Equal("Test Job", result.Title);
+            Assert.Equal("Test Company", result.CompanyName);
         }
 
         [Fact]
@@ -55,13 +63,13 @@ namespace ResumeJobMatcher.Tests.Services
             var filePath = "empty.txt";
             var fileName = "empty.txt";
             var content = "";
-            
-            _llmServiceMock.Setup(x => x.GenerateResponseAsync(It.IsAny<string>()))
-                .ReturnsAsync("{}");
-            
+
+            _llmServiceMock.Setup(x => x.GenerateResponseAsyncGenerics<JobDescriptionExtractionData>(It.IsAny<string>()))
+                .ReturnsAsync(new JobDescriptionExtractionData());
+
             // Act
             var result = await _service.ProcessJobDescriptionAsync(filePath, fileName);
-            
+
             // Assert
             Assert.NotNull(result);
             Assert.NotEmpty(result.Id);
@@ -73,20 +81,26 @@ namespace ResumeJobMatcher.Tests.Services
         {
             // Arrange
             var content = "Software Engineer position with 5+ years experience";
-            
-            _llmServiceMock.Setup(x => x.GenerateResponseAsync(It.IsAny<string>()))
-                .ReturnsAsync("{\"title\": \"Software Engineer\", \"requiredExperience\": \"5+ years\"}");
-            
+
+            _llmServiceMock.Setup(x => x.GenerateResponseAsyncGenerics<JobDescriptionExtractionData>(It.IsAny<string>()))
+                .ReturnsAsync(new JobDescriptionExtractionData
+                {
+                    Title = "Software Engineer",
+                    RequiredExperience = "5+ years"
+                });
+
             // Act
             var methodInfo = _service.GetType()
-                .GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                 .First(m => m.Name == "ExtractStructuredInformation");
 
             var result = await (Task<JobDescription>)methodInfo.Invoke(_service, new object[] { content, "test.txt" });
-            
+
             // Assert
             Assert.NotNull(result);
-            Assert.NotEmpty(result.Id);
+            Assert.Equal("Software Engineer", result.Title);
+            Assert.Equal("5+ years", result.RequiredExperience);
+            Assert.Equal(content, result.Content);
         }
     }
 }

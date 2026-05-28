@@ -32,7 +32,7 @@ RUN apt-get update && \
 COPY --from=build /app/out .
 
 # Copy models into the models directory 
-COPY models/ /app/models
+# COPY models/ /app/models
 
 ENV ASPNETCORE_ENVIRONMENT=Development
 # Expose the port the app runs on

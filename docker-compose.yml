@@ -9,6 +9,7 @@ services:
       - MatchingSettings__ModelName=llama3:8b
     volumes:
       - resume_app_data:/app/resumes
+      - /home/Anuja/JobWebScraper/ResumeMatch/models:/app/models:Z
 
 volumes:
   ollama_data:
